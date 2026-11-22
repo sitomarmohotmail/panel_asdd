@@ -1,0 +1,36 @@
+{
+  "name": "sitomarmohotmail",
+  "metadata": {
+    "description": "Claude Code plugins maintained by sitomarmohotmail"
+  },
+  "owner": {
+    "name": "sitomarmohotmail",
+    "email": "sitomarmo@hotmail.com"
+  },
+  "plugins": [
+    {
+      "name": "asdd",
+      "description": "Agentic Specification-Driven Development framework for Claude Code. Provides 13 specialized agents, 11 pipeline hooks, 5 discovery skills, and quality-gate rules to orchestrate AI-driven software development from intent to production.",
+      "source": "./claude-plugins/asdd",
+      "category": "productivity",
+      "version": "1.0.0",
+      "author": {
+        "name": "sitomarmohotmail",
+        "email": "sitomarmo@hotmail.com"
+      },
+      "homepage": "https://sitomarmohotmail.github.io/panel_asdd",
+      "repository": "https://github.com/sitomarmohotmail/panel_asdd",
+      "license": "MIT",
+      "keywords": ["ASDD", "specification-driven", "agentic", "pipeline", "framework", "agents", "development"],
+      "tags": [
+        "productivity",
+        "collaboration",
+        "visualization",
+        "design",
+        "architecture",
+        "ai",
+        "workspace"
+      ]
+    }
+  ]
+}
