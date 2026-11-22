@@ -12,7 +12,7 @@
 //   node scripts/serve-panel.mjs --no-open       (no abrir el navegador)
 
 import http from 'node:http'
-import { createReadStream } from 'node:fs'
+import { createReadStream, writeFileSync, unlinkSync } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { dirname, join, normalize, extname } from 'node:path'
@@ -65,8 +65,19 @@ const server = http.createServer(async (req, res) => {
   }
 })
 
+// Record where the panel is being served so the Claude Code plugin can open
+// it from here (it cannot probe the server itself). Runtime state, not versioned.
+const urlFile = join(ROOT, 'asdd_tools', '.panel-url')
+function removeUrlFile() { try { unlinkSync(urlFile) } catch { /* already gone */ } }
+process.on('SIGINT',  () => { removeUrlFile(); process.exit(0) })
+process.on('SIGTERM', () => { removeUrlFile(); process.exit(0) })
+process.on('exit', removeUrlFile)
+
 server.listen(port, '127.0.0.1', () => {
   const url = `http://localhost:${port}${PANEL}`
+  try {
+    writeFileSync(urlFile, JSON.stringify({ url, port, ts: Date.now() }, null, 2))
+  } catch { /* non-fatal: the plugin falls back to its default/config */ }
   console.log(`Panel ASDD servido en  ${url}`)
   console.log(`Raíz: ${ROOT}`)
   console.log('Ctrl+C para detener.')

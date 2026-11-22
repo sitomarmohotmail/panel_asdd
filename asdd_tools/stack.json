@@ -21,5 +21,38 @@
       "label": "PHP / Composer",
       "a11y": false
     }
+  ],
+  "states": [
+    {
+      "id": "draft",
+      "label": "Draft",
+      "color": "#6272a4"
+    },
+    {
+      "id": "approved",
+      "label": "Approved",
+      "color": "#ffb86c",
+      "gates": [
+        {
+          "label": "Validation",
+          "note": "M · L"
+        }
+      ]
+    },
+    {
+      "id": "implemented",
+      "label": "Implemented",
+      "color": "#50fa7b",
+      "gates": [
+        {
+          "label": "Tests · check.sh",
+          "note": "all"
+        },
+        {
+          "label": "Sec · A11y",
+          "note": "L"
+        }
+      ]
+    }
   ]
 }

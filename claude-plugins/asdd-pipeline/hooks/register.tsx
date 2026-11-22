@@ -51,44 +51,67 @@ function node(
     fill="${active ? textColor : stroke}">${count}</text>`
 }
 
-function gate(x: number, y: number, w: number, h: number, lines: string[]): string {
-  const mid = x + w / 2
-  const lineH = 11
-  const startY = y + (h - lines.length * lineH) / 2 + lineH - 2
-  const textEls = lines
-    .map((l, i) => `<text x="${mid}" y="${startY + i * lineH}" text-anchor="middle"
-      font-family="system-ui,sans-serif" font-size="8.5" fill="#4d5a7a">${l}</text>`)
-    .join('\n')
-  return `
-  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.round(h / 2)}"
-    fill="none" stroke="#262f47" stroke-width="1" stroke-dasharray="4,3"/>
-  ${textEls}`
-}
+// A pipeline state (dynamic): comes from the project's config.json / stack.json.
+type PipelineGate = { label: string; note?: string }
+type PipelineState = { id: string; label: string; color?: string; gates?: PipelineGate[] }
+
+// Standard ASDD workflow — used when the project defines no `states`.
+const DEFAULT_STATES: PipelineState[] = [
+  { id: 'draft',       label: 'Draft',       color: '#8898bc' },
+  { id: 'approved',    label: 'Approved',    color: '#ffb86c', gates: [{ label: 'validation' }] },
+  { id: 'implemented', label: 'Implemented', color: '#50fa7b',
+    gates: [{ label: 'tests · qa' }, { label: 'sec · a11y' }] },
+]
 
 function arrow(x1: number, x2: number, y: number): string {
   return `<line x1="${x1}" y1="${y}" x2="${x2 - 1}" y2="${y}"
     stroke="#2a3448" stroke-width="1.5" marker-end="url(#arr)"/>`
 }
 
+function hexToRgba(hex: string, a: number): string {
+  const m = String(hex || '').replace('#', '')
+  const n = m.length === 3 ? m.split('').map(c => c + c).join('') : m
+  const r = parseInt(n.slice(0, 2), 16) || 0
+  const g = parseInt(n.slice(2, 4), 16) || 0
+  const b = parseInt(n.slice(4, 6), 16) || 0
+  return `rgba(${r},${g},${b},${a})`
+}
+
+// Dynamic pipeline: lays out one node per configured state, evenly, with arrows
+// (and any declared gate labels) between them. Works for any number of states.
 function makePipelineSvg(
-  counts: { borrador: number; aprobada: number; implementada: number },
+  states: PipelineState[],
+  counts: Record<string, number>,
   filter: string | null,
 ): string {
-  // Layout constants
   const W = 700, H = 92
-  const ny = 16, nh = 60       // node y, height
-  const gy = 28, gh = 36       // gate y, height
-  const ay = ny + nh / 2       // arrow y (node center)
+  const ny = 16, nh = 60
+  const ay = ny + nh / 2
+  const gap = 16
+  const n = states.length || 1
+  const nw = Math.max(60, (W - 20 - gap * (n - 1)) / n)
 
-  // Node x positions
-  const n1x = 10,  n1w = 118
-  const g1x = 148, g1w = 82
-  const n2x = 250, n2w = 124
-  const g2x = 394, g2w = 94
-  const n3x = 508, n3w = 182
-
-  const aFill  = (s: string) => filter === s ? '0.22' : '0.08'
-  const aSW    = (s: string) => filter === s ? '2.5' : '1.5'
+  let x = 10
+  const parts: string[] = []
+  states.forEach((s, i) => {
+    const active = filter === s.id
+    const fg = s.color || '#5a6888'
+    parts.push(node(
+      x, ny, nw, nh, (s.label || s.id).toUpperCase(), counts[s.id] || 0,
+      fg, hexToRgba(fg, active ? 0.22 : 0.08),
+      active ? '#dce3f4' : fg, active,
+    ))
+    if (i < n - 1) {
+      const gates = states[i + 1].gates || []
+      parts.push(arrow(x + nw, x + nw + gap, ay))
+      if (gates.length) {
+        parts.push(`<text x="${x + nw + gap / 2}" y="${ay - 6}" text-anchor="middle"
+          font-family="system-ui,sans-serif" font-size="7" fill="#4d5a7a">${
+            gates.map(g => g.label).join(' · ')}</text>`)
+      }
+    }
+    x += nw + gap
+  })
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
   <defs>
@@ -98,26 +121,7 @@ function makePipelineSvg(
     </marker>
   </defs>
   <rect width="${W}" height="${H}" rx="12" fill="#090d1b"/>
-
-  ${node(n1x, ny, n1w, nh, 'BORRADOR', counts.borrador,
-    '#5a6888', `rgba(90,106,136,${aFill('borrador')})`,
-    filter === 'borrador' ? '#c8d8f8' : '#8898bc', filter === 'borrador')}
-
-  ${arrow(n1x + n1w, g1x, ay)}
-  ${gate(g1x, gy, g1w, gh, ['val · M/L'])}
-  ${arrow(g1x + g1w, n2x, ay)}
-
-  ${node(n2x, ny, n2w, nh, 'APROBADA', counts.aprobada,
-    '#d4910f', `rgba(212,145,15,${aFill('aprobada')})`,
-    filter === 'aprobada' ? '#ffd070' : '#d4910f', filter === 'aprobada')}
-
-  ${arrow(n2x + n2w, g2x, ay)}
-  ${gate(g2x, gy - 6, g2w, gh + 12, ['tests · qa', 'seg · a11y L'])}
-  ${arrow(g2x + g2w, n3x, ay)}
-
-  ${node(n3x, ny, n3w, nh, 'IMPLEMENTADA', counts.implementada,
-    '#0ea567', `rgba(14,163,104,${aFill('implementada')})`,
-    filter === 'implementada' ? '#6eebc4' : '#0ea567', filter === 'implementada')}
+  ${parts.join('\n')}
 </svg>`
 }
 
@@ -132,6 +136,40 @@ function parseFm(content: string): Record<string, string> {
     if (kv) result[kv[1].trim()] = kv[2].trim()
   }
   return result
+}
+
+// Load the dynamic pipeline states from stack.json (generated from config.json).
+// Falls back to the standard ASDD workflow when none are configured.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadStates($: any, specsDir: string): Promise<PipelineState[]> {
+  try {
+    const stackPath = specsDir.replace(/\/specs$/, '/asdd_tools/stack.json')
+    const raw = await $.fs.read(stackPath)
+    const data = JSON.parse(typeof raw === 'string' ? raw : '{}')
+    if (Array.isArray(data.states) && data.states.length > 0) {
+      return data.states
+        .filter((s: PipelineState) => s && s.id)
+        .map((s: PipelineState) => ({
+          id: String(s.id), label: s.label || String(s.id),
+          color: s.color || '', gates: Array.isArray(s.gates) ? s.gates : [],
+        }))
+    }
+  } catch { /* fall back to defaults */ }
+  return DEFAULT_STATES
+}
+
+// Read the URL recorded by serve-panel.mjs (asdd_tools/.panel-url), i.e. where
+// the panel is actually being served. Empty string if not running / not found.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadPanelUrl($: any, specsDir: string): Promise<string> {
+  try {
+    const urlPath = specsDir.replace(/\/specs$/, '/asdd_tools/.panel-url')
+    const raw = await $.fs.read(urlPath)
+    const data = JSON.parse(typeof raw === 'string' ? raw : '{}')
+    return typeof data.url === 'string' ? data.url : ''
+  } catch {
+    return ''
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -165,7 +203,7 @@ async function loadSpecs($: any, specsDir: string): Promise<Spec[]> {
         titulo: fm.titulo || name.replace(/^\d{3}-/, '').replace(/\.md$/, ''),
         nivel: (fm.nivel as 'S' | 'M' | 'L') || 'S',
         tipo: fm.tipo || '',
-        estado: fm.estado as 'borrador' | 'aprobada' | 'implementada',
+        estado: fm.estado,
         version: fm.version || '1.0',
         gates: [],
       })
@@ -212,8 +250,14 @@ export const register: Register = (on, options) => {
   const isConfigured: boolean = Boolean(configuredDir)
   const projectName: string = specsDir.replace(/\/specs\/?$/, '').split('/').filter(Boolean).pop() || 'panel_asdd'
   const rootDir: string = specsDir.replace(/\/specs\/?$/, '')
-  const defaultPanelUrl: string = `https://${projectName}.local/asdd_tools/index.html`
-  const panelUrl: string = (options?.userConfig as any)?.panelUrl || defaultPanelUrl
+  // Panel URL resolution (the plugin cannot probe the server, so):
+  //   1. userConfig.panelUrl, if set explicitly;
+  //   2. the URL recorded by serve-panel.mjs in asdd_tools/.panel-url (where it
+  //      was last served — follows the running Node server and its port);
+  //   3. the Node default below.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userPanelUrl: string = (options?.userConfig as any)?.panelUrl || ''
+  const defaultPanelUrl = 'http://localhost:8777/asdd_tools/index.html'
 
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -268,11 +312,14 @@ export const register: Register = (on, options) => {
         list.includes(id) ? list.filter(x => x !== id) : [...list, id]
       )
 
-    const counts = {
-      borrador:     specs.filter(s => s.estado === 'borrador').length,
-      aprobada:     specs.filter(s => s.estado === 'aprobada').length,
-      implementada: specs.filter(s => s.estado === 'implementada').length,
-    }
+    // Dynamic states: from the project's config.json (via stack.json).
+    const states = await loadStates($, specsDir)
+    // Where to open the full panel: explicit config > last served (Node) > default.
+    const recordedUrl = await loadPanelUrl($, specsDir)
+    const panelUrl = userPanelUrl || recordedUrl || defaultPanelUrl
+    const counts: Record<string, number> = {}
+    for (const st of states) counts[st.id] = specs.filter(s => s.estado === st.id).length
+
     const levelCounts: Record<string, number> = { S: 0, M: 0, L: 0 }
     for (const s of specs) levelCounts[s.nivel] = (levelCounts[s.nivel] ?? 0) + 1
 
@@ -286,7 +333,12 @@ export const register: Register = (on, options) => {
     type Estado = keyof typeof STATE
     type Nivel  = keyof typeof LEVEL
 
-    const sc = (s: string) => STATE[s as Estado] ?? STATE.borrador
+    // Card colours: use the configured state colour, falling back to the built-in palette.
+    const sc = (id: string) => {
+      const st = states.find(x => x.id === id)
+      if (st && st.color) return { fg: st.color, bg: hexToRgba(st.color, 0.12), bd: hexToRgba(st.color, 0.4) }
+      return STATE[id as Estado] ?? STATE.borrador
+    }
     const lc = (n: string) => LEVEL[n as Nivel]  ?? LEVEL.S
 
     return (
@@ -296,7 +348,7 @@ export const register: Register = (on, options) => {
         <Box flexDirection="row" gap={2} alignItems="center">
           <Text bold color="#dce3f4">ASDD Dashboard</Text>
           <Text dimColor>{projectName} · {specs.length} specs</Text>
-          {filter      && <Text color="#d4910f">· {filter}</Text>}
+          {filter      && <Text color="#d4910f">· {states.find(s => s.id === filter)?.label ?? filter}</Text>}
           {levelFilter && <Text color={LEVEL[levelFilter as keyof typeof LEVEL]?.fg ?? '#dce3f4'}>· nivel {levelFilter}</Text>}
         </Box>
 
@@ -310,21 +362,21 @@ export const register: Register = (on, options) => {
           </Box>
         )}
 
-        {/* ── SVG pipeline diagram ── */}
+        {/* ── SVG pipeline diagram (dynamic states) ── */}
         <Svg
-          source={makePipelineSvg(counts, filter)}
-          alt="Pipeline ASDD: Borrador → Aprobada → Implementada"
+          source={makePipelineSvg(states, counts, filter)}
+          alt={`ASDD pipeline: ${states.map(s => s.label).join(' → ')}`}
         />
 
         {/* ── Filter chips: estado ── */}
         <Box flexDirection="column" gap={1}>
           <Box flexDirection="row" gap={1} flexWrap="wrap">
-            {(['borrador', 'aprobada', 'implementada'] as Estado[]).map(s => (
+            {states.map(st => (
               <Button
-                key={`f-${s}`}
-                label={`${s} ${counts[s]}`}
-                variant={filter === s ? 'primary' : 'secondary'}
-                onPress={() => setFilter(s)}
+                key={`f-${st.id}`}
+                label={`${st.label} ${counts[st.id] ?? 0}`}
+                variant={filter === st.id ? 'primary' : 'secondary'}
+                onPress={() => setFilter(st.id)}
               />
             ))}
           </Box>

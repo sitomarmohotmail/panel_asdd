@@ -1,240 +1,33 @@
 [
   {
     "id": "001",
-    "titulo": "Tema hijo de Bootstrap5",
-    "nivel": "L",
-    "tipo": "tema",
-    "estado": "implementada",
-    "version": "1.4",
-    "file": "001-tema-hijo.md",
-    "gates": [
-      "val",
-      "qa",
-      "seg",
-      "a11y"
-    ],
+    "titulo": "Sample feature — health-check endpoint",
+    "nivel": "M",
+    "tipo": "feature",
+    "estado": "draft",
+    "version": "1.0",
+    "file": "001-sample1.md",
+    "gates": [],
     "reports": {
       "spec": {
-        "version": "1.4",
-        "estado": "implementada"
-      },
-      "validacion": {
-        "fecha": "2026-11-08",
-        "version": "1.1 (tercera pasada)",
-        "resultado": "SUPERADA CON AVISOS",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 1 BAJO"
-      },
-      "qa": {
-        "fecha": "2026-11-08 (tercera pasada)",
-        "version": "1.1",
-        "resultado": "SUPERADA CON AVISOS",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 2 BAJOS"
-      },
-      "seguridad": {
-        "fecha": "2026-11-08",
-        "version": "1.1",
-        "resultado": "SUPERADA CON AVISOS",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 1 MEDIO · 1 BAJO"
-      },
-      "accesibilidad": {
-        "fecha": "2026-11-08 (tercera pasada)",
-        "version": "1.1 (estado `en-curso`; las correcciones de las pasadas 1 y 2 están aplicadas en el sitio y aún no tienen commit)",
-        "resultado": "**PENDIENTE DE REVISIÓN MANUAL**",
-        "hallazgos": "0 ALTOS · 0 MEDIOS · 0 BAJOS · 10 OBS"
+        "version": "1.0",
+        "estado": "draft"
       }
     }
   },
   {
     "id": "002",
-    "titulo": "Linters de CSS, JS y Twig en la puerta de QA",
-    "nivel": "S",
-    "tipo": "modulo",
-    "estado": "implementada",
-    "version": "1.0",
-    "file": "002-linters-front.md",
-    "gates": [],
-    "reports": {
-      "spec": {
-        "version": "1.0",
-        "estado": "implementada"
-      }
-    }
-  },
-  {
-    "id": "003",
-    "titulo": "Tema de administración Gin",
-    "nivel": "S",
-    "tipo": "tema",
-    "estado": "implementada",
-    "version": "1.0",
-    "file": "003-tema-admin-gin.md",
-    "gates": [],
-    "reports": {
-      "spec": {
-        "version": "1.0",
-        "estado": "implementada"
-      }
-    }
-  },
-  {
-    "id": "004",
-    "titulo": "Módulo de desarrollo Devel",
-    "nivel": "S",
-    "tipo": "modulo",
-    "estado": "implementada",
-    "version": "1.0",
-    "file": "004-devel.md",
-    "gates": [],
-    "reports": {
-      "spec": {
-        "version": "1.0",
-        "estado": "implementada"
-      }
-    }
-  },
-  {
-    "id": "005",
-    "titulo": "Módulo Admin Toolbar",
-    "nivel": "S",
-    "tipo": "modulo",
-    "estado": "implementada",
-    "version": "1.0",
-    "file": "005-admin-toolbar.md",
-    "gates": [],
-    "reports": {
-      "spec": {
-        "version": "1.0",
-        "estado": "implementada"
-      }
-    }
-  },
-  {
-    "id": "006",
-    "titulo": "Navigation Extra Tools 1.3.2",
-    "nivel": "S",
-    "tipo": "contrib",
-    "estado": "borrador",
-    "version": "1.0",
-    "file": "006-navigation-extra-tools.md",
-    "gates": [],
-    "reports": {
-      "spec": {
-        "version": "1.0",
-        "estado": "borrador"
-      }
-    }
-  },
-  {
-    "id": "007",
-    "titulo": "Módulo sdc_cartoteca — bloque buscador de mapas con componentes SDC",
+    "titulo": "Sample feature — request rate limiting",
     "nivel": "L",
-    "tipo": "modulo",
-    "estado": "implementada",
-    "version": "1.7",
-    "file": "007-sdc-cartoteca.md",
-    "gates": [
-      "val",
-      "qa",
-      "seg",
-      "a11y"
-    ],
+    "tipo": "feature",
+    "estado": "approved",
+    "version": "1.0",
+    "file": "002-sample2.md",
+    "gates": [],
     "reports": {
       "spec": {
-        "version": "1.7",
-        "estado": "implementada"
-      },
-      "validacion": {
-        "fecha": "2026-11-21",
-        "version": "1.6 (en-curso)",
-        "resultado": "SUPERADA CON AVISOS",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 1 MEDIO · 3 BAJOS"
-      },
-      "qa": {
-        "fecha": "2026-11-21",
-        "version": "1.6",
-        "resultado": "SUPERADA",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 0 BAJOS nuevos"
-      },
-      "seguridad": {
-        "fecha": "2026-11-21",
-        "version": "la vigente en `specs/007-sdc-cartoteca.md`",
-        "resultado": "SUPERADA CON AVISOS (resolver DEP-001 y XSS-001 antes de `implementada`)",
-        "hallazgos": "0 BLOQUEANTES · 2 ALTOS · 1 MEDIO · 2 BAJOS"
-      },
-      "accesibilidad": {
-        "fecha": "2026-11-21",
-        "version": "1.6 (estado `implementada`; revisión retrospectiva, sustituye al informe de la v1.5)",
-        "resultado": "SUPERADA CON AVISOS (lista manual confirmada por la persona, 2026-11-21)",
-        "hallazgos": "0 ALTOS · 1 MEDIO · 4 BAJOS · 0 OBS"
-      }
-    }
-  },
-  {
-    "id": "008",
-    "titulo": "Fiabilidad del dashboard asdd_tools (hook, veredicto, estado en-curso y orden)",
-    "nivel": "M",
-    "tipo": "modulo",
-    "estado": "implementada",
-    "version": "1.3",
-    "file": "008-dashboard-fiabilidad.md",
-    "gates": [
-      "val",
-      "qa"
-    ],
-    "reports": {
-      "spec": {
-        "version": "1.3",
-        "estado": "implementada"
-      },
-      "validacion": {
-        "fecha": "2026-11-21",
-        "version": "1.2 (2ª pasada) → corregida en 1.3",
-        "resultado": "SUPERADA CON AVISOS (v1.3)",
-        "hallazgos": "0 BLOQUEANTES · 3 ALTOS · 3 MEDIOS · 2 BAJOS (todos corregidos en v1.3)"
-      },
-      "qa": {
-        "fecha": "2026-11-21",
-        "version": "1.3",
-        "resultado": "SUPERADA",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 0 BAJOS nuevos"
-      }
-    }
-  },
-  {
-    "id": "009",
-    "titulo": "QA agnóstica de tecnología (perfiles de stack) y selector en el panel",
-    "nivel": "L",
-    "tipo": "panel",
-    "estado": "implementada",
-    "version": "1.3",
-    "file": "009-qa-agnostica-stack.md",
-    "gates": [
-      "val",
-      "qa",
-      "a11y"
-    ],
-    "reports": {
-      "spec": {
-        "version": "1.3",
-        "estado": "implementada"
-      },
-      "validacion": {
-        "fecha": "2026-11-21",
-        "version": "1.3 (2ª pasada; la 1ª, sobre v1.0, salió BLOQUEADA)",
-        "resultado": "SUPERADA",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 2 BAJOS"
-      },
-      "qa": {
-        "fecha": "2026-11-21",
-        "version": "1.3",
-        "resultado": "SUPERADA",
-        "hallazgos": "0 BLOQUEANTES · 0 ALTOS · 0 MEDIOS · 0 BAJOS nuevos"
-      },
-      "accesibilidad": {
-        "fecha": "2026-11-21",
-        "version": "implementada (revisión retrospectiva)",
-        "resultado": "SUPERADA CON AVISOS (pendiente de lista manual de la persona)",
-        "hallazgos": "0 ALTOS · 3 MEDIOS · 2 BAJOS · 0 OBS"
+        "version": "1.0",
+        "estado": "approved"
       }
     }
   }

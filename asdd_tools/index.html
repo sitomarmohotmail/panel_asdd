@@ -1026,30 +1026,93 @@ main {
 <script>
 let SPECS = [];
 
-// Pipeline nodes definition
-const PIPELINE = [
-  { type:'state', id:'borrador',     label:'Borrador' },
-  { type:'arrow' },
-  { type:'gate',  label:'Validación', note:'M · L' },
-  { type:'arrow' },
-  { type:'state', id:'aprobada',     label:'Aprobada' },
-  { type:'arrow' },
-  { type:'state', id:'en-curso',     label:'En curso' },
-  { type:'arrow' },
-  { type:'gate',  label:'Tests + código', note:'todos' },
-  { type:'arrow' },
-  { type:'gate',  label:'check.sh',  note:'todos' },
-  { type:'arrow' },
-  { type:'gate',  label:'Seg. · A11y', note:'L' },
-  { type:'arrow' },
-  { type:'state', id:'implementada', label:'Implementada' },
+// ── Dynamic state model ──────────────────────────────────
+// The pipeline stages are NOT hard-coded: they come from the `states` array
+// in config.json (passed through to stack.json by gen-specs-json.sh). Each
+// state has { id, label, color, gates? }; `gates` are the quality gates shown
+// before that state in the pipeline. If no states are configured, this default
+// (the standard ASDD workflow) is used.
+const DEFAULT_STATES = [
+  { id:'draft',       label:'Draft',       color:'#6272a4' },
+  { id:'approved',    label:'Approved',    color:'#ffb86c',
+    gates:[{ label:'Validation', note:'M · L' }] },
+  { id:'implemented', label:'Implemented', color:'#50fa7b',
+    gates:[{ label:'Tests · check.sh', note:'all' }, { label:'Sec · A11y', note:'L' }] },
 ];
+// Built-in ids already have hand-tuned CSS; others get colours injected at runtime.
+const BUILTIN_STATE_IDS = new Set(['borrador', 'aprobada', 'en-curso', 'implementada']);
 
-const STATE_LABELS = { borrador:'borrador', aprobada:'aprobada', 'en-curso':'en curso', implementada:'implementada' };
-const FILTER_ES    = { borrador:'borradores', aprobada:'aprobadas', 'en-curso':'en curso', implementada:'implementadas' };
+let STATES = DEFAULT_STATES;
+let STATE_ORDER = [];              // ordered ids
+let STATE_LABELS = {};             // id -> label
+let FILTER_ES = {};                // id -> filter caption
+let STEP_POS = {};                 // id -> 1-based position
+let PIPELINE = [];                 // nodes for the pipeline diagram
 
-// Track steps: borrador=1, aprobada=2, en-curso=3, implementada=4
-const STEP_POS = { borrador:1, aprobada:2, 'en-curso':3, implementada:4 };
+function rebuildStateModel() {
+  STATE_ORDER = STATES.map(s => s.id);
+  STATE_LABELS = {}; FILTER_ES = {}; STEP_POS = {}; PIPELINE = [];
+  STATES.forEach((s, i) => {
+    STATE_LABELS[s.id] = s.label || s.id;
+    FILTER_ES[s.id]    = s.label || s.id;
+    STEP_POS[s.id]     = i + 1;
+    (s.gates || []).forEach(g => {
+      if (PIPELINE.length) PIPELINE.push({ type:'arrow' });
+      PIPELINE.push({ type:'gate', label:g.label, note:g.note || '' });
+    });
+    if (PIPELINE.length) PIPELINE.push({ type:'arrow' });
+    PIPELINE.push({ type:'state', id:s.id, label:s.label || s.id });
+  });
+}
+
+function hexToRgba(hex, a) {
+  const m = String(hex || '').replace('#', '');
+  const n = m.length === 3 ? m.split('').map(c => c + c).join('') : m;
+  const r = parseInt(n.slice(0, 2), 16) || 0;
+  const g = parseInt(n.slice(2, 4), 16) || 0;
+  const b = parseInt(n.slice(4, 6), 16) || 0;
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+// Generate colour rules for any configured state that is not a built-in.
+function injectStateStyles() {
+  let css = '';
+  STATES.forEach(s => {
+    if (BUILTIN_STATE_IDS.has(s.id)) return;
+    const fg = s.color || '#8898bc';
+    const bg = hexToRgba(fg, 0.12), bd = hexToRgba(fg, 0.5);
+    css += `
+.stat.${s.id}{color:${fg};background:${bg};border-color:${bd};}
+.pn-box.${s.id}{border-color:${bd};color:${fg};}
+.kol-cell[data-col="${s.id}"]{background:linear-gradient(to bottom, ${hexToRgba(fg, .18)}, ${bg});}
+.kol-hd.${s.id}{color:${fg};background:${bg};border-color:${bd};}
+.card[data-estado="${s.id}"]{background:linear-gradient(160deg, var(--surface) 30%, ${hexToRgba(fg, .14)} 100%);border-color:${bd};}
+.dp-estado.${s.id}{color:${fg};background:${bg};border-color:${bd};}`;
+  });
+  let el = document.getElementById('dyn-state-css');
+  if (!el) { el = document.createElement('style'); el.id = 'dyn-state-css'; document.head.appendChild(el); }
+  el.textContent = css;
+}
+
+// Apply a states list (from stack.json) and re-render everything that depends on it.
+function applyStates(list) {
+  if (Array.isArray(list) && list.length) {
+    STATES = list
+      .filter(s => s && s.id)
+      .map(s => ({ id:String(s.id), label:s.label || String(s.id), color:s.color || '',
+                   gates:Array.isArray(s.gates) ? s.gates : [] }));
+  } else {
+    STATES = DEFAULT_STATES;
+  }
+  rebuildStateModel();
+  injectStateStyles();
+  renderStats();
+  renderPipeline();
+  renderSpecs();
+  applyFilter();
+}
+
+rebuildStateModel();
 
 let activeFilter = null;
 let runningAgents = {}; // { specId: ['asdd-validacion', ...] }
@@ -1177,7 +1240,7 @@ function count(state) { return SPECS.filter(s => s.estado === state).length; }
 
 function renderStats() {
   const el = document.getElementById('stat-row');
-  el.innerHTML = ['implementada','en-curso','aprobada','borrador'].map(s =>
+  el.innerHTML = [...STATE_ORDER].reverse().map(s =>
     `<button class="stat ${s}${activeFilter===s?' active':''}" data-state="${s}" aria-pressed="${activeFilter===s}">
       <span>${count(s)}</span>${STATE_LABELS[s]}
     </button>`
@@ -1295,8 +1358,8 @@ function cardHTML(spec) {
 
 function renderSpecs() {
   const sorted = [...SPECS].sort((a, b) => b.id.localeCompare(a.id));
-  const cols = ['borrador', 'aprobada', 'en-curso', 'implementada'];
-  const labels = { borrador:'Borrador', aprobada:'Aprobada', 'en-curso':'En curso', implementada:'Implementada' };
+  const cols = STATE_ORDER;
+  const labels = STATE_LABELS;
   const counts = {};
   cols.forEach(c => counts[c] = sorted.filter(s => s.estado === c).length);
 
@@ -1697,7 +1760,7 @@ let _stkOpener = null;
 async function pollStack() {
   try {
     const r = await fetch('/asdd_tools/stack.json?t=' + Date.now());
-    if (r.ok) { STACK = await r.json(); renderStackBadge(); }
+    if (r.ok) { STACK = await r.json(); renderStackBadge(); applyStates(STACK.states); }
   } catch {}
 }
 

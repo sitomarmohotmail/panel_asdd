@@ -89,6 +89,12 @@ const config: Config = {
           label: "Agent Catalog",
         },
         {
+          type: "docSidebar",
+          sidebarId: "panelSidebar",
+          position: "left",
+          label: "Panel",
+        },
+        {
           type: "doc",
           docId: "manifesto",
           label: "Manifesto",

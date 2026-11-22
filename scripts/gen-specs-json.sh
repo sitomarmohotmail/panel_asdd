@@ -125,6 +125,10 @@ if command -v jq &>/dev/null; then
   else
     avail_json='[]'
   fi
-  jq -n --arg a "$active" --argjson av "$avail_json" '{active:$a, available:$av}' > "$STACK_OUT"
-  echo "Generado $STACK_OUT — stack activo: ${active:-(sin definir)}"
+  # Pipeline states (dynamic): passed through from config.json for the panel.
+  states_json="$(jq -c '.states // []' "$CONFIG" 2>/dev/null)"
+  [ -z "$states_json" ] && states_json='[]'
+  jq -n --arg a "$active" --argjson av "$avail_json" --argjson st "$states_json" \
+    '{active:$a, available:$av, states:$st}' > "$STACK_OUT"
+  echo "Generado $STACK_OUT — stack activo: ${active:-(sin definir)} — estados: $(printf '%s' "$states_json" | jq 'length')"
 fi

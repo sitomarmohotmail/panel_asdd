@@ -13,7 +13,7 @@
     "panelUrl": {
       "type": "string",
       "title": "URL del panel completo",
-      "description": "URL del panel web ASDD (ej: https://mi-proyecto.local/asdd_tools/index.html). Si se deja vacío se genera automáticamente desde el nombre del proyecto.",
+      "description": "URL del panel web ASDD (ej: http://localhost:8777/asdd_tools/index.html). Si se deja vacío, el plugin usa la URL que registra serve-panel.mjs al levantar el panel (asdd_tools/.panel-url) y, si no hay ninguna, el puerto Node por defecto (8777).",
       "default": ""
     }
   }

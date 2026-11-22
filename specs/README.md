@@ -19,16 +19,16 @@ El agente propone el nivel en la cabecera y la persona lo confirma al aprobar.
 ## Ciclo
 
 ```
-borrador → [validación, M/L] → aprobada → tests en rojo → implementación
-        → scripts/check.sh → [seguridad / accesibilidad, L] → implementada → commit
+draft → [validación, M/L] → approved → tests en rojo → implementación
+        → scripts/check.sh → [seguridad / accesibilidad, L] → implemented → commit
 ```
 
-1. **Spec** desde `_plantilla.md`: contexto breve, requisitos con prioridad y
+1. **Spec** desde `_template.md`: contexto breve, requisitos con prioridad y
    criterios EARS (uno por comportamiento).
 2. **Validación** (M/L): una pasada de `asdd-validacion`. El agente principal
    corrige los BLOQUEANTES y ALTOS comprobándolos en el código; no se repite
    la pasada salvo que un BLOQUEANTE no pueda cubrirse con un test.
-3. **Aprobación** de la persona (`estado: aprobada`).
+3. **Aprobación** de la persona (`estado: approved`).
 4. **Tests primero** (solo si hay código propio), anotando el rojo en *Tareas*
    (`rojo: N fallos`). Contrib puro: sin tests — la comunidad los mantiene.
    Durante el desarrollo: `vendor/bin/phpunit --group GRUPO`.
@@ -37,14 +37,17 @@ borrador → [validación, M/L] → aprobada → tests en rojo → implementaci�
    phpstan, `config:status`, trazabilidad y, si hay interfaz, axe + reflujo +
    foco a 1280 y 320 px). Resumen en la sección *Puertas* de la spec.
 7. **Seguridad / accesibilidad** (L): una pasada; corregir ALTOS con su test.
-8. **Cierre**: `estado: implementada` y commit `spec-NNN: …`.
+8. **Cierre**: `estado: implemented` y commit `spec-NNN: …`.
 
 Los hallazgos **BAJOS** no se corrigen en la spec: una línea en
 `specs/pendientes.md`. Los agentes solo escriben informe (`NNN-*.md`, máx.
 ~40 líneas) si hay hallazgos MEDIOS o superiores.
 
 ## Estados
-`borrador` → `aprobada` → `en-curso` → `implementada`
+`draft` → `approved` → `implemented`
+
+Los estados del panel son **configurables** en `asdd_tools/config.json`
+(campo `states`); estos son los del flujo ASDD por defecto.
 
 ## Criterios en EARS
 

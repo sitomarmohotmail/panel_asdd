@@ -11,7 +11,7 @@ export type Spec = {
   titulo: string
   nivel: 'S' | 'M' | 'L'
   tipo: string
-  estado: 'borrador' | 'aprobada' | 'implementada'
+  estado: string
   version: string
   gates: string[]
   reports?: Record<string, SpecReport>

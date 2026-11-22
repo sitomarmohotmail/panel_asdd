@@ -2,7 +2,7 @@
 id: NNN
 titulo: Título corto
 version: 1.0
-estado: borrador
+estado: draft
 nivel: S | M | L
 tipo: modulo | tema | contrib
 proyecto: nombre_maquina
