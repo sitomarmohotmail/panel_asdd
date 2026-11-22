@@ -1,0 +1,13 @@
+{
+  "label": "Node / TypeScript",
+  "a11y": false,
+  "gates": [
+    { "id": "types", "label": "tsc --noEmit", "cmd": ["npx", "tsc", "--noEmit"] },
+    { "id": "lint",  "label": "eslint",       "cmd": ["npx", "eslint", "."] },
+    { "id": "test",  "label": "vitest",       "cmd": ["npx", "vitest", "run"], "cmd_group": ["npx", "vitest", "run", "-t", "{group}"] }
+  ],
+  "trace": {
+    "pattern": "test:([A-Za-z0-9_]+)",
+    "locate": "grep -rqs '{1}' --include='*.test.js' --include='*.test.ts' ."
+  }
+}

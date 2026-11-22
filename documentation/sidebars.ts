@@ -51,6 +51,23 @@ const sidebars: SidebarsConfig = {
     },
   ],
 
+  panelSidebar: [
+    {
+      type: "category",
+      label: "The ASDD Panel",
+      link: { type: "doc", id: "panel/overview" },
+      collapsed: false,
+      items: [
+        "panel/overview",
+        "panel/web-dashboard",
+        "panel/claude-code-plugin",
+        "panel/stacks-and-qa",
+        "panel/scripts",
+        "panel/installation",
+      ],
+    },
+  ],
+
   agentsSidebar: [
     {
       type: "category",

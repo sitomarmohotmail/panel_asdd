@@ -1,0 +1,34 @@
+[
+  {
+    "id": "001",
+    "titulo": "Sample feature — health-check endpoint",
+    "nivel": "M",
+    "tipo": "feature",
+    "estado": "draft",
+    "version": "1.0",
+    "file": "001-sample1.md",
+    "gates": [],
+    "reports": {
+      "spec": {
+        "version": "1.0",
+        "estado": "draft"
+      }
+    }
+  },
+  {
+    "id": "002",
+    "titulo": "Sample feature — request rate limiting",
+    "nivel": "L",
+    "tipo": "feature",
+    "estado": "approved",
+    "version": "1.0",
+    "file": "002-sample2.md",
+    "gates": [],
+    "reports": {
+      "spec": {
+        "version": "1.0",
+        "estado": "approved"
+      }
+    }
+  }
+]

@@ -31,6 +31,22 @@
         "ai",
         "workspace"
       ]
+    },
+    {
+      "name": "asdd-pipeline",
+      "description": "Claude Code side panel with the ASDD pipeline and spec status (dynamic stages via config.json).",
+      "source": "./claude-plugins/asdd-pipeline",
+      "category": "productivity",
+      "version": "0.3.0",
+      "author": {
+        "name": "sitomarmohotmail",
+        "email": "sitomarmo@hotmail.com"
+      },
+      "homepage": "https://sitomarmohotmail.github.io/panel_asdd",
+      "repository": "https://github.com/sitomarmohotmail/panel_asdd",
+      "license": "MIT",
+      "keywords": ["ASDD", "specs", "pipeline", "dashboard", "panel", "claude-code"],
+      "tags": ["productivity", "visualization", "workspace"]
     }
   ]
 }

@@ -1,0 +1,16 @@
+{
+  "label": "Java 21 / Maven",
+  "a11y": false,
+  "gates": [
+    { "id": "compile",  "label": "mvn compile",     "cmd": ["mvn", "-q", "-B", "compile"] },
+    { "id": "static",   "label": "spotbugs:check",   "cmd": ["mvn", "-q", "-B", "spotbugs:check"] },
+    { "id": "style",    "label": "checkstyle:check", "cmd": ["mvn", "-q", "-B", "checkstyle:check"] },
+    { "id": "test",     "label": "mvn test",
+      "cmd":       ["mvn", "-q", "-B", "test"],
+      "cmd_group": ["mvn", "-q", "-B", "test", "-Dgroups={group}"] }
+  ],
+  "trace": {
+    "pattern": "([A-Za-z0-9_]+Test)::([A-Za-z0-9_]+)",
+    "locate": "grep -rsq '{2}' --include='{1}.java' src/test"
+  }
+}

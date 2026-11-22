@@ -1,0 +1,15 @@
+{
+  "label": ".NET 8 / ASP.NET",
+  "a11y": false,
+  "gates": [
+    { "id": "build",  "label": "dotnet build -warnaserror", "cmd": ["dotnet", "build", "-warnaserror", "--nologo"] },
+    { "id": "test",   "label": "dotnet test",
+      "cmd":       ["dotnet", "test", "--nologo"],
+      "cmd_group": ["dotnet", "test", "--filter", "Category={group}", "--nologo"] },
+    { "id": "format", "label": "dotnet format (verify)", "cmd": ["dotnet", "format", "--verify-no-changes"] }
+  ],
+  "trace": {
+    "pattern": "([A-Za-z0-9_]+Tests)::([A-Za-z0-9_]+)",
+    "locate": "grep -rsq '{2}' --include='{1}.cs' ."
+  }
+}
