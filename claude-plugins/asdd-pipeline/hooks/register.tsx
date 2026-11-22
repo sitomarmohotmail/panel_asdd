@@ -244,12 +244,20 @@ const LEVEL = {
 // ── Register ──────────────────────────────────────────────────────────────────
 
 export const register: Register = (on, options) => {
+  // Specs directory resolution:
+  //   1. userConfig.specsDir, if set explicitly (same path for every project);
+  //   2. otherwise derive it from the CURRENT project — <CLAUDE_PROJECT_DIR>/specs —
+  //      so the plugin works per-project with no configuration;
+  //   3. otherwise empty (shows the "not configured" notice).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const configuredDir: string = (options?.userConfig as any)?.specsDir || ''
-  const specsDir: string = configuredDir || DEFAULT_SPECS_DIR
-  const isConfigured: boolean = Boolean(configuredDir)
+  // Read CLAUDE_PROJECT_DIR without needing Node type defs.
+  const env = (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } }).process?.env || {}
+  const projectDir: string = (env.CLAUDE_PROJECT_DIR || '').replace(/\/+$/, '')
+  const derivedDir: string = projectDir ? `${projectDir}/specs` : ''
+  const specsDir: string = configuredDir || derivedDir || DEFAULT_SPECS_DIR
+  const isConfigured: boolean = Boolean(configuredDir || derivedDir)
   const projectName: string = specsDir.replace(/\/specs\/?$/, '').split('/').filter(Boolean).pop() || 'panel_asdd'
-  const rootDir: string = specsDir.replace(/\/specs\/?$/, '')
   // Panel URL resolution (the plugin cannot probe the server, so):
   //   1. userConfig.panelUrl, if set explicitly;
   //   2. the URL recorded by serve-panel.mjs in asdd_tools/.panel-url (where it

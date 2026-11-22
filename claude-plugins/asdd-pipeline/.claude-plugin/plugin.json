@@ -1,13 +1,13 @@
 {
   "name": "asdd-pipeline",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Panel lateral con el pipeline ASDD y el estado de las specs del proyecto",
   "types": "./types/index.d.ts",
   "userConfig": {
     "specsDir": {
       "type": "string",
       "title": "Directorio specs/",
-      "description": "Ruta absoluta al directorio specs/ del proyecto (ej: /home/usuario/miproyecto/specs)",
+      "description": "Ruta absoluta al directorio specs/ del proyecto (ej: /home/usuario/miproyecto/specs). Si se deja vacío, el plugin lo deriva automáticamente del proyecto actual como $CLAUDE_PROJECT_DIR/specs, así que normalmente no hace falta configurarlo por proyecto. Fíjalo solo si tu directorio de specs no es <proyecto>/specs.",
       "default": ""
     },
     "panelUrl": {

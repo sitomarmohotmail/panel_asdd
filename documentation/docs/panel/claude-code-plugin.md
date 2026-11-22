@@ -57,20 +57,48 @@ pipeline, filters, counts and colours match whatever stages the project configur
 ## Installation & configuration
 
 The plugin ships without a hard-coded path, so it is portable across projects.
-After installing it in Claude Code, point it at your project's `specs/`
-directory:
+It requires **Claude Code ≥ v2.1.287** (UI-module plugins / "mods").
 
 ```bash
-claude plugin configure asdd-pipeline
+# 1. register this repo as a local plugin marketplace (user scope = global)
+claude plugin marketplace add /home/you/path/to/panel_asdd
+
+# 2. install the plugin (plugin-name@marketplace-name)
+claude plugin install asdd-pipeline@sitomarmohotmail --scope user
+
+# 3. (optional) configure — only if your specs are NOT at <project>/specs
+claude plugin configure asdd-pipeline@sitomarmohotmail
 ```
+
+After install, restart Claude Code (or `/reload-plugins`). The **`⬡ ASDD`** button
+appears above the prompt on its own, and the panel opens with **`/asdd_dashboard`**.
+The first time you open a new directory, accept the **trust** prompt or mods won't
+load there.
 
 | Setting | Description |
 |---|---|
-| `specsDir` | **Absolute** path to your project's `specs/` directory (e.g. `/home/user/my-project/specs`). |
-| `panelUrl` | URL of the full web dashboard. Optional — see resolution below. |
+| `specsDir` | **Absolute** path to your project's `specs/` directory. Optional — see resolution below. |
+| `panelUrl` | URL of the full web dashboard. Optional — see [resolution](#the-full-panel-link) below. |
 
-If `specsDir` is left empty the panel shows a *"plugin not configured"* notice
-with the command to run.
+### Which specs it reads
+
+`specsDir` is resolved in this order, so the plugin works per-project with no
+configuration:
+
+1. **`specsDir`** from the plugin config, if you set one explicitly. This is a
+   single, machine-wide value (plugin config is stored in your user settings, not
+   per project), so set it only if you want one fixed specs directory everywhere.
+2. **`$CLAUDE_PROJECT_DIR/specs`** — derived from the project you currently have
+   open. This is the default and needs no configuration: open any project and the
+   panel reads *that* project's `specs/`.
+3. Empty → the panel shows a *"plugin not configured"* notice.
+
+:::tip Multi-project use
+Leave `specsDir` **unset**. Because the plugin derives it from the current project
+(`$CLAUDE_PROJECT_DIR`), you get each project's own specs automatically, without
+reconfiguring when you switch projects. Set `specsDir` only when your specs live
+somewhere other than `<project>/specs`.
+:::
 
 ### The full-panel link
 
@@ -93,3 +121,60 @@ Pair the plugin with the hooks in [`.claude/settings.json`](./scripts.md#agent-h
 so that `specs.json` is regenerated every time a spec file changes, and the
 panel reflects in-flight agents in real time.
 :::
+
+## Scope — install once, use everywhere
+
+Installing at **user scope** (the default) registers the marketplace and the
+plugin under `~/.claude`, so they are **global**: every project on the machine
+gets the plugin automatically. **You do not re-register or re-install per
+project.**
+
+| Thing | Where it lives (user scope) | Per project? |
+|---|---|---|
+| Marketplace (`marketplace add`) | `~/.claude` (`extraKnownMarketplaces` / `known_marketplaces.json`) | No — one per user |
+| Installed plugin | `~/.claude/plugins/…` (`installed_plugins.json`) | No |
+| Enablement (`enabledPlugins`) | `~/.claude/settings.json` | No — inherited by every project |
+| Config (`specsDir`, `panelUrl`) | `~/.claude/settings.json` (`pluginConfigs`) | **No — single machine-wide value** |
+| Specs it actually reads | — | **Yes — auto-derived from `$CLAUDE_PROJECT_DIR`** |
+
+Because plugin config is machine-wide (not per project), the plugin derives the
+specs directory from the **current** project instead — see
+[Which specs it reads](#which-specs-it-reads). So in practice, **nothing needs
+repeating when you open or create a new project** (beyond accepting the trust
+prompt the first time).
+
+**Scopes** (the `--scope` flag on `marketplace add` / `install`):
+
+- `user` *(default)* — global, this machine.
+- `project` — writes the enablement to the repo's committed `.claude/settings.json`,
+  so collaborators get it; each collaborator still runs the project-scope install
+  once in their clone (committing the entry doesn't download the plugin).
+- `local` — this repo only (`.claude/settings.local.json`).
+
+Precedence when more than one sets it: **local > project > user**. A project can
+set a plugin to `false` to turn it off just for that repo.
+
+**On a new machine** you do repeat the one-time setup: `marketplace add`,
+`install`, and any `specsDir`/`panelUrl` config — because those live in
+`~/.claude`.
+
+## Updating & development
+
+Because the marketplace points at a **local path**, the plugin loads **in place
+from the source directory** — there is no cached copy. Edits to `register.tsx`
+take effect at the next session start or `/reload-plugins`; **no version bump is
+needed** (that only applies to remote marketplaces).
+
+Useful commands while working on the plugin:
+
+```bash
+# validate the manifest, types path and hooks module (lists the events it registers)
+claude plugin validate /home/you/path/to/panel_asdd/claude-plugins/asdd-pipeline
+
+# iterate without installing — load the directory for one session (hot-reloads on save)
+claude --plugin-dir /home/you/path/to/panel_asdd/claude-plugins/asdd-pipeline
+```
+
+If a mod silently fails to load, check: the **trust** prompt was accepted for the
+directory, and none of `disableAllHooks`, `--safe-mode`, `--bare` or a managed
+`allowManagedModsOnly` policy is active.
