@@ -7,7 +7,7 @@
     "specsDir": {
       "type": "string",
       "title": "Directorio specs/",
-      "description": "Ruta absoluta al directorio specs/ del proyecto (ej: /home/usuario/miproyecto/specs). Si se deja vacío, el plugin lo deriva automáticamente del proyecto actual como $CLAUDE_PROJECT_DIR/specs, así que normalmente no hace falta configurarlo por proyecto. Fíjalo solo si tu directorio de specs no es <proyecto>/specs.",
+      "description": "Ruta absoluta al directorio specs/ del proyecto (ej: /home/usuario/miproyecto/specs). Si se deja vacío, el plugin usa rutas relativas (specs/ y asdd_tools/) al directorio desde el que lanzaste Claude Code, así que normalmente no hace falta configurarlo y funciona por proyecto. Fíjalo solo si tu specs/ no está en la raíz del proyecto.",
       "default": ""
     },
     "panelUrl": {

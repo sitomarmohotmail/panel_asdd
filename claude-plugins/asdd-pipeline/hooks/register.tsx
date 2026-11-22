@@ -3,10 +3,6 @@ import type { Register } from 'claude-code'
 import type { Spec, SpecReport } from '../types'
 
 const PANE = 'asdd-pipeline'
-// Sin ruta por defecto: el plugin es portable. Configúralo con
-//   claude plugin configure asdd-pipeline
-// e indica la ruta absoluta a tu directorio specs/.
-const DEFAULT_SPECS_DIR = ''
 
 // Resumen por documento de la spec (igual que el panel web: mismo orden y campos).
 const DOC_LABELS: Record<string, string> = {
@@ -141,9 +137,8 @@ function parseFm(content: string): Record<string, string> {
 // Load the dynamic pipeline states from stack.json (generated from config.json).
 // Falls back to the standard ASDD workflow when none are configured.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function loadStates($: any, specsDir: string): Promise<PipelineState[]> {
+async function loadStates($: any, stackPath: string): Promise<PipelineState[]> {
   try {
-    const stackPath = specsDir.replace(/\/specs$/, '/asdd_tools/stack.json')
     const raw = await $.fs.read(stackPath)
     const data = JSON.parse(typeof raw === 'string' ? raw : '{}')
     if (Array.isArray(data.states) && data.states.length > 0) {
@@ -161,9 +156,8 @@ async function loadStates($: any, specsDir: string): Promise<PipelineState[]> {
 // Read the URL recorded by serve-panel.mjs (asdd_tools/.panel-url), i.e. where
 // the panel is actually being served. Empty string if not running / not found.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function loadPanelUrl($: any, specsDir: string): Promise<string> {
+async function loadPanelUrl($: any, urlPath: string): Promise<string> {
   try {
-    const urlPath = specsDir.replace(/\/specs$/, '/asdd_tools/.panel-url')
     const raw = await $.fs.read(urlPath)
     const data = JSON.parse(typeof raw === 'string' ? raw : '{}')
     return typeof data.url === 'string' ? data.url : ''
@@ -173,11 +167,10 @@ async function loadPanelUrl($: any, specsDir: string): Promise<string> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function loadSpecs($: any, specsDir: string): Promise<Spec[]> {
+async function loadSpecs($: any, specsJsonPath: string, specsDirPath: string): Promise<Spec[]> {
   // Intentar leer specs.json (ya incluye gates) desde asdd_tools/
   try {
-    const jsonPath = specsDir.replace(/\/specs$/, '/asdd_tools/specs.json')
-    const raw = await $.fs.read(jsonPath)
+    const raw = await $.fs.read(specsJsonPath)
     const data = JSON.parse(typeof raw === 'string' ? raw : '[]')
     if (Array.isArray(data) && data.length > 0) {
       return data.map((s: Spec) => ({ ...s, gates: s.gates || [] }))
@@ -186,7 +179,7 @@ async function loadSpecs($: any, specsDir: string): Promise<Spec[]> {
 
   // Fallback: parsear frontmatter de cada spec
   try {
-    const entries: Array<{ name: string; kind: string }> = await $.fs.list(specsDir)
+    const entries: Array<{ name: string; kind: string }> = await $.fs.list(specsDirPath)
     const specs: Spec[] = []
     for (const entry of entries) {
       const { name } = entry
@@ -194,7 +187,7 @@ async function loadSpecs($: any, specsDir: string): Promise<Spec[]> {
       if (!name.match(/^\d{3}-/)) continue
       if (!name.endsWith('.md')) continue
       if (name.match(/-(qa|validacion|seguridad|accesibilidad)\.md$/)) continue
-      const raw = await $.fs.read(`${specsDir}/${name}`)
+      const raw = await $.fs.read(`${specsDirPath}/${name}`)
       const text = typeof raw === 'string' ? raw : ''
       const fm = parseFm(text)
       if (!fm.id || !fm.estado) continue
@@ -244,20 +237,19 @@ const LEVEL = {
 // ── Register ──────────────────────────────────────────────────────────────────
 
 export const register: Register = (on, options) => {
-  // Specs directory resolution:
-  //   1. userConfig.specsDir, if set explicitly (same path for every project);
-  //   2. otherwise derive it from the CURRENT project — <CLAUDE_PROJECT_DIR>/specs —
-  //      so the plugin works per-project with no configuration;
-  //   3. otherwise empty (shows the "not configured" notice).
+  // Specs/paths resolution. The mod runtime has no process.env, but $.fs resolves
+  // RELATIVE paths against the current session's working directory (the open
+  // project). So:
+  //   - If userConfig.specsDir is set (absolute), use absolute paths from it.
+  //   - Otherwise use relative paths (specs, asdd_tools/…) → the current project,
+  //     with no configuration needed, per-project automatically.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const configuredDir: string = (options?.userConfig as any)?.specsDir || ''
-  // Read CLAUDE_PROJECT_DIR without needing Node type defs.
-  const env = (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } }).process?.env || {}
-  const projectDir: string = (env.CLAUDE_PROJECT_DIR || '').replace(/\/+$/, '')
-  const derivedDir: string = projectDir ? `${projectDir}/specs` : ''
-  const specsDir: string = configuredDir || derivedDir || DEFAULT_SPECS_DIR
-  const isConfigured: boolean = Boolean(configuredDir || derivedDir)
-  const projectName: string = specsDir.replace(/\/specs\/?$/, '').split('/').filter(Boolean).pop() || 'panel_asdd'
+  const base: string = configuredDir.replace(/\/specs\/?$/, '') // absolute root, or '' if not configured
+  const specsDirPath: string = configuredDir || 'specs'
+  const specsJsonPath: string = base ? `${base}/asdd_tools/specs.json` : 'asdd_tools/specs.json'
+  const stackJsonPath: string = base ? `${base}/asdd_tools/stack.json` : 'asdd_tools/stack.json'
+  const panelUrlPath: string = base ? `${base}/asdd_tools/.panel-url` : 'asdd_tools/.panel-url'
   // Panel URL resolution (the plugin cannot probe the server, so):
   //   1. userConfig.panelUrl, if set explicitly;
   //   2. the URL recorded by serve-panel.mjs in asdd_tools/.panel-url (where it
@@ -272,13 +264,13 @@ export const register: Register = (on, options) => {
       name: 'asdd_dashboard',
       description: 'Abrir el panel visual de specs ASDD',
     })
-    const specs = await loadSpecs($, specsDir)
+    const specs = await loadSpecs($, specsJsonPath, specsDirPath)
     await update($, specsAtom, () => specs)
     return next(e)
   })
 
   on('command.run', { command: 'asdd_dashboard' }, async ($) => {
-    const specs = await loadSpecs($, specsDir)
+    const specs = await loadSpecs($, specsJsonPath, specsDirPath)
     await update($, specsAtom, () => specs)
     await $.ui.open({ id: PANE, title: 'ASDD Dashboard' })
     return { text: 'Panel ASDD abierto.' }
@@ -297,7 +289,7 @@ export const register: Register = (on, options) => {
             if (isOpen) {
               await $.ui.close({ id: PANE })
             } else {
-              const specs = await loadSpecs($, specsDir)
+              const specs = await loadSpecs($, specsJsonPath, specsDirPath)
               await update($, specsAtom, () => specs)
               await $.ui.open({ id: PANE, title: 'ASDD Dashboard' })
             }
@@ -321,10 +313,15 @@ export const register: Register = (on, options) => {
       )
 
     // Dynamic states: from the project's config.json (via stack.json).
-    const states = await loadStates($, specsDir)
+    const states = await loadStates($, stackJsonPath)
     // Where to open the full panel: explicit config > last served (Node) > default.
-    const recordedUrl = await loadPanelUrl($, specsDir)
+    const recordedUrl = await loadPanelUrl($, panelUrlPath)
     const panelUrl = userPanelUrl || recordedUrl || defaultPanelUrl
+
+    // Header label: derived from the configured path when set, else generic
+    // (the mod runtime exposes no cwd value to read; files use relative paths).
+    const projectName = base.split('/').filter(Boolean).pop() || 'project'
+
     const counts: Record<string, number> = {}
     for (const st of states) counts[st.id] = specs.filter(s => s.estado === st.id).length
 
@@ -360,13 +357,13 @@ export const register: Register = (on, options) => {
           {levelFilter && <Text color={LEVEL[levelFilter as keyof typeof LEVEL]?.fg ?? '#dce3f4'}>· nivel {levelFilter}</Text>}
         </Box>
 
-        {/* ── Aviso de configuración pendiente (solo si no cargó specs) ── */}
-        {!isConfigured && specs.length === 0 && (
+        {/* ── Aviso: no se encontraron specs ── */}
+        {specs.length === 0 && (
           <Box flexDirection="column" gap={1} borderStyle="round" borderColor="#d4910f" paddingX={2} paddingY={1}>
-            <Text color="#d4910f" bold>⚠ Plugin sin configurar</Text>
-            <Text color="#8898bc">Ejecuta en la terminal:</Text>
-            <Text color="#f8f8f2">  claude plugin configure asdd-pipeline</Text>
-            <Text color="#8898bc">e introduce la ruta a tu directorio specs/.</Text>
+            <Text color="#d4910f" bold>⚠ No specs found</Text>
+            <Text color="#8898bc">Looked in: {specsDirPath}/ (relative to the open project)</Text>
+            <Text color="#8898bc">Add a spec (NNN-*.md) there, or point elsewhere with:</Text>
+            <Text color="#f8f8f2">  claude plugin configure asdd-pipeline@sitomarmohotmail</Text>
           </Box>
         )}
 
@@ -542,7 +539,7 @@ export const register: Register = (on, options) => {
             key="refresh"
             label="↺ Actualizar specs"
             onPress={async () => {
-              const fresh = await loadSpecs($, specsDir)
+              const fresh = await loadSpecs($, specsJsonPath, specsDirPath)
               await update($, specsAtom, () => fresh)
             }}
           />

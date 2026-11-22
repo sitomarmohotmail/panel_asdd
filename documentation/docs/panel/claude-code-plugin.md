@@ -85,19 +85,22 @@ load there.
 `specsDir` is resolved in this order, so the plugin works per-project with no
 configuration:
 
-1. **`specsDir`** from the plugin config, if you set one explicitly. This is a
-   single, machine-wide value (plugin config is stored in your user settings, not
-   per project), so set it only if you want one fixed specs directory everywhere.
-2. **`$CLAUDE_PROJECT_DIR/specs`** — derived from the project you currently have
-   open. This is the default and needs no configuration: open any project and the
-   panel reads *that* project's `specs/`.
-3. Empty → the panel shows a *"plugin not configured"* notice.
+1. **`specsDir`** from the plugin config, if you set one explicitly (an absolute
+   path). This is a single, machine-wide value (plugin config is stored in your
+   user settings, not per project), so set it only if you want one fixed specs
+   directory everywhere, or if your `specs/` is not at the project root.
+2. **Relative paths** (`specs/` and `asdd_tools/…`) — when `specsDir` is unset, the
+   plugin uses relative paths, which `$.fs` resolves against the **working
+   directory of the session** (where you launched Claude Code). Open any project
+   from its root and the panel reads *that* project's specs. No configuration.
+3. If nothing is found, the panel shows a *"No specs found"* notice naming where it
+   looked.
 
 :::tip Multi-project use
-Leave `specsDir` **unset**. Because the plugin derives it from the current project
-(`$CLAUDE_PROJECT_DIR`), you get each project's own specs automatically, without
-reconfiguring when you switch projects. Set `specsDir` only when your specs live
-somewhere other than `<project>/specs`.
+Leave `specsDir` **unset**. The plugin then reads `specs/` and `asdd_tools/`
+relative to the project you launched Claude Code in, so each project shows its own
+specs with no reconfiguring. Set `specsDir` (absolute) only when your `specs/`
+lives somewhere other than the project root.
 :::
 
 ### The full-panel link
