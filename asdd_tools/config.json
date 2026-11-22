@@ -1,0 +1,6 @@
+{
+  "project_name": "panel_asdd",
+  "specs_dir": "../specs",
+  "output_json": "specs.json",
+  "stack": "php"
+}

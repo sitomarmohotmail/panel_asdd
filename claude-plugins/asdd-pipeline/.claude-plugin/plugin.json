@@ -1,0 +1,20 @@
+{
+  "name": "asdd-pipeline",
+  "version": "0.2.0",
+  "description": "Panel lateral con el pipeline ASDD y el estado de las specs del proyecto",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "specsDir": {
+      "type": "string",
+      "title": "Directorio specs/",
+      "description": "Ruta absoluta al directorio specs/ del proyecto (ej: /home/usuario/miproyecto/specs)",
+      "default": ""
+    },
+    "panelUrl": {
+      "type": "string",
+      "title": "URL del panel completo",
+      "description": "URL del panel web ASDD (ej: https://mi-proyecto.local/asdd_tools/index.html). Si se deja vacío se genera automáticamente desde el nombre del proyecto.",
+      "default": ""
+    }
+  }
+}

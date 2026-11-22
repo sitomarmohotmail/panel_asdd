@@ -1,0 +1,4 @@
+# Secretos y estado de runtime del panel ASDD (nunca versionar)
+asdd_tools/.api-key
+asdd_tools/running.json
+asdd_tools/.running.stack

@@ -1,0 +1,25 @@
+{
+  "active": "php",
+  "available": [
+    {
+      "id": "dotnet",
+      "label": ".NET 8 / ASP.NET",
+      "a11y": false
+    },
+    {
+      "id": "java",
+      "label": "Java 21 / Maven",
+      "a11y": false
+    },
+    {
+      "id": "node",
+      "label": "Node / TypeScript",
+      "a11y": false
+    },
+    {
+      "id": "php",
+      "label": "PHP / Composer",
+      "a11y": false
+    }
+  ]
+}

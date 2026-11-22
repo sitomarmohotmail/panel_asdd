@@ -1,0 +1,14 @@
+{
+  "label": "PHP / Composer",
+  "a11y": false,
+  "gates": [
+    { "id": "test",    "label": "phpunit",  "cmd": ["vendor/bin/phpunit"],
+      "cmd_group": ["vendor/bin/phpunit", "--group", "{group}"] },
+    { "id": "phpcs",   "label": "phpcs",    "cmd": ["vendor/bin/phpcs", "-q"] },
+    { "id": "phpstan", "label": "phpstan",  "cmd": ["vendor/bin/phpstan", "analyse", "--no-progress"] }
+  ],
+  "trace": {
+    "pattern": "([A-Za-z0-9_]+Test)::(test[A-Za-z0-9_]+)",
+    "locate": "grep -rqs 'function {2}' --include='{1}.php' ."
+  }
+}
