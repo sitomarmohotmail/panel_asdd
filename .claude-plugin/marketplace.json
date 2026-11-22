@@ -34,7 +34,7 @@
     },
     {
       "name": "asdd-pipeline",
-      "description": "Panel lateral en Claude Code con el pipeline ASDD y el estado de las specs (etapas dinámicas por config.json).",
+      "description": "Claude Code side panel with the ASDD pipeline and spec status (dynamic stages via config.json).",
       "source": "./claude-plugins/asdd-pipeline",
       "category": "productivity",
       "version": "0.3.0",

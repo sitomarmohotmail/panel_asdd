@@ -941,7 +941,7 @@ main {
       <code class="proj-tag">panel_asdd</code>
       <h1>ASDD Dashboard</h1>
       <button class="stack-badge" id="stack-badge" type="button" hidden
-              aria-haspopup="dialog" aria-label="Stack activo; abrir selector de tecnología">
+              aria-haspopup="dialog" aria-label="Active stack; open technology selector">
         <span class="dot" aria-hidden="true"></span><span id="stack-badge-label">—</span>
       </button>
     </div>
@@ -952,27 +952,27 @@ main {
 <main>
   <!-- Pipeline flow -->
   <section>
-    <p class="section-label">Flujo de trabajo</p>
+    <p class="section-label">Workflow</p>
     <div class="pipeline-scroll">
       <div class="pipeline-flow" id="pipeline-flow"></div>
     </div>
     <div class="legend">
-      <div class="leg-item"><span class="lvl s">S</span> Sin agentes · check.sh</div>
-      <div class="leg-item"><span class="lvl m">M</span> + Validación</div>
-      <div class="leg-item"><span class="lvl l">L</span> + Seguridad · Accesibilidad</div>
-      <div class="leg-item"><span class="gate-legend"></span> Puerta de calidad</div>
+      <div class="leg-item"><span class="lvl s">S</span> No agents · check.sh</div>
+      <div class="leg-item"><span class="lvl m">M</span> + Validation</div>
+      <div class="leg-item"><span class="lvl l">L</span> + Security · Accessibility</div>
+      <div class="leg-item"><span class="gate-legend"></span> Quality gate</div>
     </div>
   </section>
 
   <!-- Specs grid -->
   <section>
     <div class="specs-hd">
-      <p class="section-label" style="margin-bottom:0">Especificaciones</p>
+      <p class="section-label" style="margin-bottom:0">Specs</p>
       <span id="filter-info"></span>
-      <button class="clear-btn" id="clear-btn" hidden>Ver todas →</button>
+      <button class="clear-btn" id="clear-btn" hidden>View all →</button>
     </div>
     <div class="agent-legend" id="agent-legend" hidden aria-live="polite">
-      <span class="agent-legend-label">Agentes activos</span>
+      <span class="agent-legend-label">Active agents</span>
       <span id="agent-legend-items"></span>
     </div>
     <div class="kanban" id="kanban"></div>
@@ -982,7 +982,7 @@ main {
 
 <footer class="site-footer">
   <span>ASDD Dashboard</span>
-  <span>Desarrollado con <a href="https://claude.ai/" target="_blank" rel="noopener">Claude</a></span>
+  <span>Built with <a href="https://claude.ai/" target="_blank" rel="noopener">Claude</a></span>
 </footer>
 
 <div class="dp-overlay" id="dp-overlay"></div>
@@ -995,7 +995,7 @@ main {
     <span class="ed-id" id="ed-id"></span>
     <span class="ed-title" id="ed-title"></span>
     <div class="ed-btns">
-      <button class="ed-btn ed-cancel" id="ed-cancel">Cerrar</button>
+      <button class="ed-btn ed-cancel" id="ed-cancel">Close</button>
     </div>
   </div>
   <div class="ed-body" id="ed-body">
@@ -1007,9 +1007,9 @@ main {
 <div class="ed-overlay" id="stk-overlay"></div>
 <div class="ed-modal" id="stk-modal" role="dialog" aria-modal="true" aria-labelledby="stk-title" inert>
   <div class="ed-head">
-    <span class="ed-title" id="stk-title">Tecnología (stack) de la QA</span>
+    <span class="ed-title" id="stk-title">QA technology (stack)</span>
     <div class="ed-btns">
-      <button class="ed-btn ed-cancel" id="stk-cancel">Cerrar</button>
+      <button class="ed-btn ed-cancel" id="stk-cancel">Close</button>
     </div>
   </div>
   <div class="ed-body">
@@ -1118,8 +1118,8 @@ let activeFilter = null;
 let runningAgents = {}; // { specId: ['asdd-validacion', ...] }
 
 const AGENT_MAP = {
-  'asdd-validacion':    { cls:'validacion',    icon:'↻', label:'validación' },
-  'asdd-seguridad':     { cls:'seguridad',     icon:'◈', label:'seguridad' },
+  'asdd-validacion':    { cls:'validacion',    icon:'↻', label:'validation' },
+  'asdd-seguridad':     { cls:'seguridad',     icon:'◈', label:'security' },
   'asdd-accesibilidad': { cls:'accesibilidad', icon:'◎', label:'a11y' },
   'tests':              { cls:'tests',         icon:'▶', label:'tests' },
 };
@@ -1284,8 +1284,8 @@ function gatesFor(spec) {
   ).join('');
 }
 
-const DOC_LABELS = { spec:'spec', validacion:'validación', qa:'qa', seguridad:'seguridad', accesibilidad:'accesibilidad' };
-const FIELD_LABELS = { fecha:'Fecha', version:'Versión de la spec', resultado:'Resultado', hallazgos:'Hallazgos' };
+const DOC_LABELS = { spec:'spec', validacion:'validation', qa:'qa', seguridad:'security', accesibilidad:'accessibility' };
+const FIELD_LABELS = { fecha:'Date', version:'Spec version', resultado:'Result', hallazgos:'Findings' };
 
 // ¿Un texto de hallazgos declara BLOQUEANTES sin resolver?
 // Los hallazgos son texto libre tipo "0 BLOQUEANTES · 2 ALTOS · …".
@@ -1330,7 +1330,7 @@ function cardHTML(spec) {
   const docsBloq = docsBloqueantes(spec);
   const blocked = docsBloq.length > 0;
   const blockLabel = blocked
-    ? `Hallazgos BLOQUEANTES sin resolver en: ${docsBloq.join(', ')}`
+    ? `Unresolved BLOCKING findings in: ${docsBloq.join(', ')}`
     : '';
   return `<article class="card collapsed" data-estado="${spec.estado}" data-spec-id="${spec.id}"${blocked ? ' data-bloqueante="true"' : ''}>
     ${blocked ? `<span class="card-block" role="img" aria-label="${esc(blockLabel)}" title="${esc(blockLabel)}">!</span>` : ''}
@@ -1340,12 +1340,12 @@ function cardHTML(spec) {
       <div class="card-badges">
         <span class="badge ${spec.nivel.toLowerCase()}">${spec.nivel}</span>
       </div>
-      <button class="card-toggle" aria-expanded="false" aria-label="Expandir tarjeta" title="Expandir">▾</button>
+      <button class="card-toggle" aria-expanded="false" aria-label="Expand card" title="Expand">▾</button>
       <div class="card-menu-wrap">
-        <button class="card-menu-btn" aria-label="Acciones" title="Acciones">☰</button>
+        <button class="card-menu-btn" aria-label="Actions" title="Actions">☰</button>
         <div class="card-menu" role="menu">
-          <button class="card-menu-item" data-action="reqs"><span class="mi">📋</span>Revisar requisitos</button>
-          <button class="card-menu-item" data-action="view"><span class="mi">👁️</span>Ver especificación</button>
+          <button class="card-menu-item" data-action="reqs"><span class="mi">📋</span>Review requirements</button>
+          <button class="card-menu-item" data-action="view"><span class="mi">👁️</span>View specification</button>
         </div>
       </div>
     </div>
@@ -1414,8 +1414,8 @@ function renderSpecs() {
       const collapsed = card.classList.toggle('collapsed');
       btn.setAttribute('aria-expanded', String(!collapsed));
       btn.textContent = collapsed ? '▾' : '▴';
-      btn.title = collapsed ? 'Expandir' : 'Contraer';
-      btn.setAttribute('aria-label', collapsed ? 'Expandir tarjeta' : 'Contraer tarjeta');
+      btn.title = collapsed ? 'Expand' : 'Collapse';
+      btn.setAttribute('aria-label', collapsed ? 'Expand card' : 'Collapse card');
     });
   });
 }
@@ -1581,7 +1581,7 @@ function renderHallazgos(reports) {
   }).join('');
   return `
       <div class="dp-sec" data-section="hallazgos">
-        <div class="dp-sec-hd">Hallazgos</div>
+        <div class="dp-sec-hd">Findings</div>
         ${groups}
       </div>`;
 }
@@ -1601,27 +1601,27 @@ function renderSpecPanel(spec, md, reports) {
       <span class="dp-estado ${spec.estado}">${esc(spec.estado)}</span>
       <span class="meta-chip">${esc(spec.tipo)}</span>
       <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">v${esc(spec.version)}</span>
-      <button class="dp-close" id="dp-close-btn" aria-label="Cerrar panel">✕</button>
+      <button class="dp-close" id="dp-close-btn" aria-label="Close panel">✕</button>
       <span class="dp-title">${esc(spec.titulo)}</span>
     </div>
     <div class="dp-body">
       ${renderHallazgos(reports)}
       ${reqs.length ? `
       <div class="dp-sec" data-section="reqs">
-        <div class="dp-sec-hd">Requisitos · ${reqs.length}</div>
+        <div class="dp-sec-hd">Requirements · ${reqs.length}</div>
         ${reqs.map(r => {
           const hasTest = traz.some(row => row[0] && row[0].trim() === r.id && row[2] && row[2].trim());
           return `
         <div class="dp-req">
           <span class="dp-req-id">${r.id}</span>
-          <span class="dp-pri ${r.pri} ${hasTest ? 'ok' : 'nok'}" title="${hasTest ? 'Con test en trazabilidad' : 'Sin test'}">${esc(r.priLabel)}</span>
+          <span class="dp-pri ${r.pri} ${hasTest ? 'ok' : 'nok'}" title="${hasTest ? 'Has a test in traceability' : 'No test'}">${esc(r.priLabel)}</span>
           <span class="dp-req-text">${esc(r.text)}</span>
         </div>`;
         }).join('')}
       </div>` : ''}
       ${cas.length ? `
       <div class="dp-sec" data-section="cas">
-        <div class="dp-sec-hd">Criterios de aceptación · ${cas.length}</div>
+        <div class="dp-sec-hd">Acceptance criteria · ${cas.length}</div>
         ${cas.map(c => `
         <div class="dp-ca">
           <span class="dp-ca-id">${c.id}</span>
@@ -1631,7 +1631,7 @@ function renderSpecPanel(spec, md, reports) {
       </div>` : ''}
       ${tasks.length ? `
       <div class="dp-sec">
-        <div class="dp-sec-hd">Tareas · ${doneCount}/${tasks.length}</div>
+        <div class="dp-sec-hd">Tasks · ${doneCount}/${tasks.length}</div>
         ${tasks.map(t => `
         <div class="dp-task${t.done?' done':''}">
           <div class="dp-chk">${t.done?'✓':''}</div>
@@ -1640,9 +1640,9 @@ function renderSpecPanel(spec, md, reports) {
       </div>` : ''}
       ${traz.length ? `
       <div class="dp-sec">
-        <div class="dp-sec-hd">Trazabilidad</div>
+        <div class="dp-sec-hd">Traceability</div>
         <table class="dp-tbl">
-          <thead><tr><th>Requisito</th><th>Criterio</th><th>Test</th></tr></thead>
+          <thead><tr><th>Requirement</th><th>Criterion</th><th>Test</th></tr></thead>
           <tbody>
             ${traz.map(r => `<tr>
               <td>${esc(r[0]||'')}</td>
@@ -1770,7 +1770,7 @@ function renderStackBadge() {
   const name = act ? act.label : (STACK.active || 'stack');
   document.getElementById('stack-badge-label').textContent = name;
   // 2.5.3 Etiqueta en el nombre: el nombre accesible contiene el texto visible.
-  badge.setAttribute('aria-label', name + ' · abrir selector de tecnología (stack)');
+  badge.setAttribute('aria-label', name + ' · open technology (stack) selector');
   badge.hidden = false;
 }
 
@@ -1788,7 +1788,7 @@ function renderStackList() {
     return `<button type="button" class="stk-item" data-id="${esc(s.id)}"`
       + (active ? ' aria-current="true"' : '') + `>`
       + `<span>${esc(s.label || s.id)}`
-      + (active ? ' <span class="stk-active">· activo</span>' : '') + `</span>`
+      + (active ? ' <span class="stk-active">· active</span>' : '') + `</span>`
       + `<span class="stk-id">${esc(s.id)}</span></button>`;
   }).join('');
   list.querySelectorAll('.stk-item').forEach(b =>
@@ -1800,7 +1800,7 @@ function chooseStack(id) {
   const note  = document.getElementById('stk-note');
   if (id === STACK.active) {
     cmdEl.hidden = true;
-    note.textContent = `«${id}» ya es el stack activo.`;
+    note.textContent = `"${id}" is already the active stack.`;
     return;
   }
   const cmd = `scripts/asdd/init.sh --stack ${id}`;
@@ -1811,9 +1811,9 @@ function chooseStack(id) {
 
 function copyCmd(text, note) {
   const done = () => { note.textContent =
-    'Comando copiado. Ejecútalo en la terminal para cambiar de stack.'; };
+    'Command copied. Run it in the terminal to switch stack.'; };
   const fail = () => { note.textContent =
-    'No se pudo copiar: selecciona y copia el comando manualmente.'; };
+    'Could not copy: select and copy the command manually.'; };
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done, fail));
   } else {

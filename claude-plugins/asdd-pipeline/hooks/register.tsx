@@ -6,11 +6,11 @@ const PANE = 'asdd-pipeline'
 
 // Resumen por documento de la spec (igual que el panel web: mismo orden y campos).
 const DOC_LABELS: Record<string, string> = {
-  spec: 'spec', validacion: 'validación', qa: 'qa', seguridad: 'seguridad', accesibilidad: 'accesibilidad',
+  spec: 'spec', validacion: 'validation', qa: 'qa', seguridad: 'security', accesibilidad: 'accessibility',
 }
 const DOC_ORDER = ['spec', 'validacion', 'qa', 'seguridad', 'accesibilidad'] as const
 const FIELD_LABELS: Record<string, string> = {
-  fecha: 'Fecha', version: 'Versión de la spec', resultado: 'Resultado', hallazgos: 'Hallazgos',
+  fecha: 'Date', version: 'Spec version', resultado: 'Result', hallazgos: 'Findings',
 }
 const FIELD_ORDER = ['fecha', 'version', 'resultado', 'hallazgos'] as const
 
@@ -262,7 +262,7 @@ export const register: Register = (on, options) => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'asdd_dashboard',
-      description: 'Abrir el panel visual de specs ASDD',
+      description: 'Open the visual ASDD specs panel',
     })
     const specs = await loadSpecs($, specsJsonPath, specsDirPath)
     await update($, specsAtom, () => specs)
@@ -273,7 +273,7 @@ export const register: Register = (on, options) => {
     const specs = await loadSpecs($, specsJsonPath, specsDirPath)
     await update($, specsAtom, () => specs)
     await $.ui.open({ id: PANE, title: 'ASDD Dashboard' })
-    return { text: 'Panel ASDD abierto.' }
+    return { text: 'ASDD panel opened.' }
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e) => {
@@ -354,7 +354,7 @@ export const register: Register = (on, options) => {
           <Text bold color="#dce3f4">ASDD Dashboard</Text>
           <Text dimColor>{projectName} · {specs.length} specs</Text>
           {filter      && <Text color="#d4910f">· {states.find(s => s.id === filter)?.label ?? filter}</Text>}
-          {levelFilter && <Text color={LEVEL[levelFilter as keyof typeof LEVEL]?.fg ?? '#dce3f4'}>· nivel {levelFilter}</Text>}
+          {levelFilter && <Text color={LEVEL[levelFilter as keyof typeof LEVEL]?.fg ?? '#dce3f4'}>· level {levelFilter}</Text>}
         </Box>
 
         {/* ── Aviso: no se encontraron specs ── */}
@@ -399,7 +399,7 @@ export const register: Register = (on, options) => {
                 />
               )
             })}
-            <Text dimColor>  S=sin agentes · M=validación · L=seg+a11y</Text>
+            <Text dimColor>  S=no agents · M=validation · L=sec+a11y</Text>
           </Box>
 
           {/* ── Limpiar filtros ── */}
@@ -407,7 +407,7 @@ export const register: Register = (on, options) => {
             <Box flexDirection="row" gap={1}>
               <Button
                 key="f-clear"
-                label="Limpiar filtros"
+                label="Clear filters"
                 onPress={() => {
                   void update($, filterAtom,      () => null)
                   void update($, levelFilterAtom, () => null)
@@ -537,7 +537,7 @@ export const register: Register = (on, options) => {
         <Box flexDirection="row" gap={2} alignItems="center" marginTop={1}>
           <Button
             key="refresh"
-            label="↺ Actualizar specs"
+            label="↺ Refresh specs"
             onPress={async () => {
               const fresh = await loadSpecs($, specsJsonPath, specsDirPath)
               await update($, specsAtom, () => fresh)
@@ -545,7 +545,7 @@ export const register: Register = (on, options) => {
           />
           {panelUrl && (
             <Link href={panelUrl}>
-              <Text color="#5a86fa">⬡ Panel completo</Text>
+              <Text color="#5a86fa">⬡ Full panel</Text>
             </Link>
           )}
         </Box>

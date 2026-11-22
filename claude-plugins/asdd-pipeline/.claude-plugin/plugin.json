@@ -1,19 +1,19 @@
 {
   "name": "asdd-pipeline",
   "version": "0.3.0",
-  "description": "Panel lateral con el pipeline ASDD y el estado de las specs del proyecto",
+  "description": "Side panel with the ASDD pipeline and the project's spec status",
   "types": "./types/index.d.ts",
   "userConfig": {
     "specsDir": {
       "type": "string",
-      "title": "Directorio specs/",
-      "description": "Ruta absoluta al directorio specs/ del proyecto (ej: /home/usuario/miproyecto/specs). Si se deja vacío, el plugin usa rutas relativas (specs/ y asdd_tools/) al directorio desde el que lanzaste Claude Code, así que normalmente no hace falta configurarlo y funciona por proyecto. Fíjalo solo si tu specs/ no está en la raíz del proyecto.",
+      "title": "specs/ directory",
+      "description": "Absolute path to the project's specs/ directory (e.g. /home/user/my-project/specs). If left empty, the plugin uses relative paths (specs/ and asdd_tools/) against the directory you launched Claude Code in, so you normally don't need to set it and it works per project. Set it only if your specs/ is not at the project root.",
       "default": ""
     },
     "panelUrl": {
       "type": "string",
-      "title": "URL del panel completo",
-      "description": "URL del panel web ASDD (ej: http://localhost:8777/asdd_tools/index.html). Si se deja vacío, el plugin usa la URL que registra serve-panel.mjs al levantar el panel (asdd_tools/.panel-url) y, si no hay ninguna, el puerto Node por defecto (8777).",
+      "title": "Full panel URL",
+      "description": "URL of the ASDD web dashboard (e.g. http://localhost:8777/asdd_tools/index.html). If left empty, the plugin uses the URL recorded by serve-panel.mjs when it serves the panel (asdd_tools/.panel-url), falling back to the default Node port (8777).",
       "default": ""
     }
   }
