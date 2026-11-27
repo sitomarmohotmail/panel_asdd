@@ -29,6 +29,9 @@ Draft  ──▶  Approved  ──▶  Implemented
 
 This workflow is **dynamic** — see [The pipeline states](#the-pipeline-states).
 
+![The ASDD web dashboard: pipeline, legend and the spec kanban](/img/panel_asdd_1.png)
+*The web dashboard — the Workflow pipeline on top, and the spec kanban below with a card's validation report expanded.*
+
 ---
 
 ## How the data flows
