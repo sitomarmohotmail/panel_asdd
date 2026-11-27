@@ -13,9 +13,6 @@ The Docusaurus site in [`documentation/`](documentation/) is built and deployed 
 
 ASDD enables engineering teams to achieve dramatically higher output while maintaining architectural quality, security, and system observability by moving from human-centric agile processes to AI-native engineering.
 
-## Human–Agent Agile Manifesto
-
-ASDD is paired with the **Human–Agent Agile Manifesto** (v3.0, Agentic Era · 2026): a concise charter for **human judgment plus agentic intelligence**—the same worldview as this framework, in manifesto form (preamble, values, principles, roles, phase gates, glossary, and comparison to the 2001 Agile Manifesto).
 
 ### Four core values
 
@@ -28,7 +25,7 @@ ASDD is paired with the **Human–Agent Agile Manifesto** (v3.0, Agentic Era · 
 | **Continuous trust loops** | Periodic reviews |
 | **Adaptive execution** | Rigid planning |
 
-**Full text:** [Human–Agent Agile Manifesto](../../../Library/Application%20Support/JetBrains/WebStorm2026.1/scratches/ASSD/docs/human–agent-agile-manifesto.md) — all principles (including Hallucination Budget, Reasoning Traces, and governance), accountability tables, and definitions.
+
 
 ## Core Principles
 
@@ -59,8 +56,6 @@ graph LR
 Each transition is governed by **Cumulative Confidence Scores (CCS)**. If confidence falls below established thresholds (e.g., CCS < 0.65), the pipeline halts for human intervention.
 
 ## Installation & Setup
-To understand the framework in depth, start with the **[Full ASDD Specification](../../../Library/Application%20Support/JetBrains/WebStorm2026.1/scratches/ASSD/docs/index.md)**.
-
 Choose the installation method for your preferred environment:
 
 ### 1. Claude (Desktop & Projects)
@@ -107,5 +102,6 @@ ASDD enforces quality through:
 -   **Production Learning Loop**: Capturing lessons learned to improve agent prompts and steering rules.
 
 ---
-*Author: Edwin Encinas*  
+*Author: Edwin Encinas, Alfonso Martínez* 
+
 *Year: 2026*
