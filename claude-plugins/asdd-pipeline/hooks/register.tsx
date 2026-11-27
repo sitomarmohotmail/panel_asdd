@@ -6,9 +6,9 @@ const PANE = 'asdd-pipeline'
 
 // Resumen por documento de la spec (igual que el panel web: mismo orden y campos).
 const DOC_LABELS: Record<string, string> = {
-  spec: 'spec', validacion: 'validation', qa: 'qa', seguridad: 'security', accesibilidad: 'accessibility',
+  spec: 'spec', validation: 'validation', qa: 'qa', security: 'security', accessibility: 'accessibility',
 }
-const DOC_ORDER = ['spec', 'validacion', 'qa', 'seguridad', 'accesibilidad'] as const
+const DOC_ORDER = ['spec', 'validation', 'qa', 'security', 'accessibility'] as const
 const FIELD_LABELS: Record<string, string> = {
   fecha: 'Date', version: 'Spec version', resultado: 'Result', hallazgos: 'Findings',
 }
@@ -210,7 +210,7 @@ async function loadSpecs($: any, specsJsonPath: string, specsDirPath: string): P
 // ¿Un texto de hallazgos declara BLOQUEANTES sin resolver?
 // Los hallazgos son texto libre tipo "0 BLOQUEANTES · 2 ALTOS · …".
 function hallazgoBloqueante(h?: string): boolean {
-  const m = String(h || '').match(/(\d+)\s*BLOQUEANTE/i)
+  const m = String(h || '').match(/(\d+)\s*(BLOQUEANTE|BLOCKING)/i)
   return Boolean(m && Number(m[1]) > 0)
 }
 

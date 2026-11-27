@@ -1284,13 +1284,13 @@ function gatesFor(spec) {
   ).join('');
 }
 
-const DOC_LABELS = { spec:'spec', validacion:'validation', qa:'qa', seguridad:'security', accesibilidad:'accessibility' };
+const DOC_LABELS = { spec:'spec', validation:'validation', qa:'qa', security:'security', accessibility:'accessibility' };
 const FIELD_LABELS = { fecha:'Date', version:'Spec version', resultado:'Result', hallazgos:'Findings' };
 
 // ¿Un texto de hallazgos declara BLOQUEANTES sin resolver?
 // Los hallazgos son texto libre tipo "0 BLOQUEANTES · 2 ALTOS · …".
 function hallazgoBloqueante(h) {
-  const m = String(h || '').match(/(\d+)\s*BLOQUEANTE/i);
+  const m = String(h || '').match(/(\d+)\s*(BLOQUEANTE|BLOCKING)/i);
   return !!(m && Number(m[1]) > 0);
 }
 

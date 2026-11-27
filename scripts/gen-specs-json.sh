@@ -28,30 +28,36 @@ hdr() { # fichero regex_etiqueta
   grep -m1 -iE "$2" "$1" | sed -E 's/^[^:]*:[[:space:]]*//; s/[[:space:]]*$//'
 }
 
-# La puerta se mantiene salvo que el valor tras "Resultado:" empiece por BLOQUEAD.
-# Sin línea "Resultado:" (p. ej. algunos informes), se mantiene.
+# La puerta se mantiene salvo que el valor tras "Resultado:/Result:" empiece por
+# BLOQUEAD/BLOCKED. Sin esa línea (p. ej. algunos informes), se mantiene.
+# Las cabeceras se reconocen en español o inglés (parser bilingüe).
 gate_ok() { # fichero informe
-  case "$(hdr "$1" '^-[[:space:]]*Resultado:')" in
-    [Bb][Ll][Oo][Qq][Uu][Ee][Aa][Dd]*) return 1 ;;
+  case "$(hdr "$1" '^-[[:space:]]*(Resultado|Result):')" in
+    [Bb][Ll][Oo][Qq][Uu][Ee][Aa][Dd]*) return 1 ;;  # BLOQUEAD…
+    [Bb][Ll][Oo][Cc][Kk][Ee][Dd]*)      return 1 ;;  # BLOCKED…
     *) return 0 ;;
   esac
 }
 
 # Resumen de cabecera de un informe como objeto JSON (solo campos presentes).
+# Acepta etiquetas en español o inglés.
 report_json() { # fichero
   jq -n \
-    --arg fecha     "$(hdr "$1" '^-[[:space:]]*Fecha:')" \
-    --arg version   "$(hdr "$1" '^-[[:space:]]*Versi[oó]n')" \
-    --arg resultado "$(hdr "$1" '^-[[:space:]]*Resultado:')" \
-    --arg hallazgos "$(hdr "$1" '^-[[:space:]]*Hallazgos')" \
+    --arg fecha     "$(hdr "$1" '^-[[:space:]]*(Fecha|Date):')" \
+    --arg version   "$(hdr "$1" '^-[[:space:]]*(Versi[oó]n|Version)')" \
+    --arg resultado "$(hdr "$1" '^-[[:space:]]*(Resultado|Result):')" \
+    --arg hallazgos "$(hdr "$1" '^-[[:space:]]*(Hallazgos|Findings)')" \
     '{fecha:$fecha, version:$version, resultado:$resultado, hallazgos:$hallazgos}
        | with_entries(select(.value != ""))'
 }
 
 for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
   name=$(basename "$f")
-  # Ignorar informes de agentes y ficheros especiales
-  case "$name" in *-qa.md|*-validacion.md|*-seguridad.md|*-accesibilidad.md) continue ;; esac
+  # Ignorar informes de agentes y ficheros especiales (sufijos ES o EN)
+  case "$name" in
+    *-qa.md|*-validacion.md|*-validation.md|*-seguridad.md|*-security.md|*-accesibilidad.md|*-accessibility.md)
+      continue ;;
+  esac
 
   # Leer solo el bloque frontmatter (entre los dos ---)
   fm=$(awk '/^---/{f=!f; next} f' "$f" | head -20)
@@ -66,16 +72,18 @@ for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
   [ -z "$id" ] && continue
 
   # Detectar puertas superadas: existe el informe Y su veredicto no es bloqueante.
+  # El fichero de informe puede tener sufijo en español o inglés.
   num="${name%%[^0-9]*}"   # primeros 3 dígitos
-  val_f="$SPECS_DIR/${num}-validacion.md"
-  qa_f="$SPECS_DIR/${num}-qa.md"
-  seg_f="$SPECS_DIR/${num}-seguridad.md"
-  a11y_f="$SPECS_DIR/${num}-accesibilidad.md"
+  pick() { for p in "$@"; do [ -f "$p" ] && { printf '%s' "$p"; return; }; done; }
+  val_f="$(pick  "$SPECS_DIR/${num}-validacion.md"    "$SPECS_DIR/${num}-validation.md")"
+  qa_f="$(pick   "$SPECS_DIR/${num}-qa.md")"
+  seg_f="$(pick  "$SPECS_DIR/${num}-seguridad.md"     "$SPECS_DIR/${num}-security.md")"
+  a11y_f="$(pick "$SPECS_DIR/${num}-accesibilidad.md" "$SPECS_DIR/${num}-accessibility.md")"
   gates_arr=()
-  [ -f "$val_f" ]  && gate_ok "$val_f"  && gates_arr+=("val")
-  [ -f "$qa_f" ]   && gate_ok "$qa_f"   && gates_arr+=("qa")
-  [ -f "$seg_f" ]  && gate_ok "$seg_f"  && gates_arr+=("seg")
-  [ -f "$a11y_f" ] && gate_ok "$a11y_f" && gates_arr+=("a11y")
+  [ -n "$val_f" ]  && gate_ok "$val_f"  && gates_arr+=("val")
+  [ -n "$qa_f" ]   && gate_ok "$qa_f"   && gates_arr+=("qa")
+  [ -n "$seg_f" ]  && gate_ok "$seg_f"  && gates_arr+=("seg")
+  [ -n "$a11y_f" ] && gate_ok "$a11y_f" && gates_arr+=("a11y")
   if [ ${#gates_arr[@]} -gt 0 ]; then
     gates_json=$(printf '%s\n' "${gates_arr[@]}" | jq -R . | jq -s .)
   else
@@ -85,9 +93,9 @@ for f in "$SPECS_DIR"/[0-9][0-9][0-9]-*.md; do
   # Resumen de cada documento para el desplegable de la tarjeta.
   reports=$(jq -n --arg v "$version" --arg e "$estado" \
     '{spec: ({version:$v, estado:$e} | with_entries(select(.value != "")))}')
-  for pair in "validacion:$val_f" "qa:$qa_f" "seguridad:$seg_f" "accesibilidad:$a11y_f"; do
+  for pair in "validation:$val_f" "qa:$qa_f" "security:$seg_f" "accessibility:$a11y_f"; do
     k="${pair%%:*}"; rf="${pair#*:}"
-    [ -f "$rf" ] || continue
+    [ -n "$rf" ] || continue
     reports=$(jq --arg k "$k" --argjson r "$(report_json "$rf")" '. + {($k): $r}' <<<"$reports")
   done
 
