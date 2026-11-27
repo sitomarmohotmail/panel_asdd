@@ -23,11 +23,19 @@
     "estado": "approved",
     "version": "1.0",
     "file": "002-sample2.md",
-    "gates": [],
+    "gates": [
+      "val"
+    ],
     "reports": {
       "spec": {
         "version": "1.0",
         "estado": "approved"
+      },
+      "validation": {
+        "fecha": "2026-11-27",
+        "version": "1.0",
+        "resultado": "OK",
+        "hallazgos": "0 BLOCKING · 1 HIGH · 2 LOW"
       }
     }
   }

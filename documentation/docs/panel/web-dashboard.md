@@ -99,6 +99,8 @@ write `estado: borrador`, set the id to `borrador`.
 
 ## What the dashboard shows
 
+![ASDD dashboard overview](/img/panel_asdd_1.png)
+
 - A header with the project name and a badge for the **active stack**.
 - The **pipeline diagram**: `Draft → Approved → Implemented` with a live count in
   each stage (the stages are configurable — see
@@ -109,6 +111,13 @@ write `estado: borrador`, set the id to `borrador`.
   cleared (`✓ val`, `✓ qa`, `✓ seg`, `✓ a11y`), a progress track and — when
   expanded — the per-document report summary (date, version, result, findings).
 - Specs with **unresolved blocking findings** are flagged in red.
+
+Click a card to open the **detail drawer** with the spec's requirements and
+acceptance criteria:
+
+![Spec detail drawer with requirements and acceptance criteria](/img/panel_asdd_2.png)
+*Clicking a card opens a side drawer listing its requirements (MUST / SHOULD /
+COULD) and EARS acceptance criteria.*
 
 ## Serving the dashboard
 
